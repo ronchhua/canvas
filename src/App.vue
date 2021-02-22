@@ -98,7 +98,7 @@ export default {
 
     drawRectangle() {
       this.canvas.beginPath();              // Use this to separate shapes
-      this.canvas.fillStyle = '#FFA500';    // Sets the rectangle insides orange.
+      this.canvas.fillStyle = '#FFA500';    // Sets the rectangle insides orange
       this.canvas.rect(this.rectangle['x'], this.rectangle['y'], this.rectangle['width'], this.rectangle['height']);
       this.canvas.fill();
       this.canvas.closePath();
