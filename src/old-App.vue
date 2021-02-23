@@ -33,24 +33,18 @@ export default {
         y: 400,
         radius: 50,
       },
-      
-      images: [
-        {
-          imageName: 'Tiger',
-          x: 250,
-          y: 50,
-          width: 300,
-          height: 200,
-        },
-        {
-          imageName: 'Hearthstone', 
-          x: 50,
-          y: 300,
-          width: 300,
-          height: 200,
-        }
-      ],
-
+      tigerImage: {
+        x: 250,
+        y: 50,
+        width: 300,
+        height: 200,
+      },
+      hearthstoneImage: {
+        x: 50,
+        y: 300,
+        width: 300,
+        height: 200,
+      },
     }
   },
 
@@ -61,15 +55,16 @@ export default {
 
     this.drawRectangle();
     this.drawCircle();
-
+  
+  
     var tigerImage = document.getElementById("tigerImage");
     tigerImage.addEventListener('load', () => {
-      this.canvas.drawImage(tigerImage, this.images[0].x, this.images[0].y, this.images[0].width, this.images[0].height);
+      this.canvas.drawImage(tigerImage, this.tigerImage['x'], this.tigerImage['y'], this.tigerImage['width'], this.tigerImage['height']);
     });
 
     var hearthstoneImage = document.getElementById("hearthstoneImage");
     hearthstoneImage.addEventListener('load', () => {
-      this.canvas.drawImage(hearthstoneImage, this.images[1].x, this.images[1].y, this.images[1].width, this.images[1].height);
+      this.canvas.drawImage(hearthstoneImage, this.hearthstoneImage['x'], this.hearthstoneImage['y'], this.hearthstoneImage['width'], this.hearthstoneImage['height']);
     });
     
     this.canvas.stroke();
@@ -89,8 +84,14 @@ export default {
       else if(this.inCircle(event)) {
         this.hoverText = "Circle";
       }
+      else if(this.inTigerImage(event)) {
+        this.hoverText = "Tiger";
+      }
+      else if(this.inHSImage(event)) {
+        this.hoverText = "Hearthstone";
+      }
       else {
-        this.hoverText = this.inImages(event);
+        this.hoverText = "Nothing hovered over";
       }
 
     },
@@ -141,42 +142,34 @@ export default {
       }
     },
 
-    inImages(event){
+    inTigerImage(event) {
 
-      
-      for(var i = 0; i < this.images.length; i++) {
+      var tigerX = this.tigerImage['x'];
+      var tigerY = this.tigerImage['y'];
+      var tigerX2 = this.tigerImage['x'] + this.tigerImage['width'];
+      var tigerY2 = this.tigerImage['y'] + this.tigerImage['height'];
 
-        var imageX = this.images[i].x;
-        var imageY = this.images[i].y;
-        var imageX2 = this.images[i].x + this.images[i].width;
-        var imageY2 = this.images[i].y + this.images[i].height;
-
-        console.log(imageX, imageY, imageX2, imageY2);
-
-        if(event.offsetX >= imageX && event.offsetX <= imageX2 && event.offsetY >= imageY && event.offsetY <= imageY2) {
-          return this.images[i].imageName;
-        }
+      if(event.offsetX >= tigerX && event.offsetX <= tigerX2 && event.offsetY >= tigerY && event.offsetY <= tigerY2) {
+        return true;
       }
-      
-/*
-      this.images.forEach(image => {
+      else{
+        return false;
+      }
+    },
 
-        console.log(image.imageName);
+    inHSImage(event){
 
-        var imageX = image.x;
-        var imageY = image.y;
-        var imageX2 = image.x + image.width;
-        var imageY2 = image.y + image.height;
+      var hearthstoneX = this.hearthstoneImage['x'];
+      var hearthstoneY = this.hearthstoneImage['y'];
+      var hearthstoneX2 = this.hearthstoneImage['x'] + this.hearthstoneImage['width'];
+      var hearthstoneY2 = this.hearthstoneImage['y'] + this.hearthstoneImage['height'];
 
-        console.log(imageX, imageY, imageX2, imageY2);
-        console.log(event.offsetX, event.offsetY);
-        if(event.offsetX >= imageX && event.offsetX <= imageX2 && event.offsetY >= imageY && event.offsetY <= imageY2) {
-          return image.imageName;
-        }
-
-      });
-*/
-      return "Nothing hovered over";
+      if(event.offsetX >= hearthstoneX && event.offsetX <= hearthstoneX2 && event.offsetY >= hearthstoneY && event.offsetY <= hearthstoneY2) {
+        return true;
+      }
+      else{
+        return false;
+      }
 
     }
 
