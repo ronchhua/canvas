@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <RotateButton :rectangle="rectangle" :circle="circle" :images="images" />
+    <RotateButton/>
     <div class = "item">{{hoverText}}</div>
     <canvas id = "canvas-container" v-on:mousemove="checkMouseHover" width="600" height="600"></canvas>
     <img src="./assets/tiger-Siberian.jpg" id="tigerImage" width="30" height="20" style="display: none;">           <!-- Images need to be rendered before being accessed by canvas-->
@@ -28,42 +28,26 @@ export default {
         x: null,
         y: null,
       },
-      rectangle: {
-        x: 50,
-        y: 50,
-        width: 100,
-        height: 175,
-      },
-      circle: {
-        x: 450,
-        y: 400,
-        radius: 50,
-      },
+      rectangle: null,
+
+      circle: null,
       
-      images: [
-        {
-          imageName: 'Tiger',
-          x: 250,
-          y: 50,
-          width: 300,
-          height: 200,
-        },
-        {
-          imageName: 'Hearthstone', 
-          x: 50,
-          y: 300,
-          width: 300,
-          height: 200,
-        }
-      ],
+      images: null,
 
     }
   },
 
   mounted() {
+
+    this.rectangle = this.$store.getters.getRectangle;
+    this.circle = this.$store.getters.getCircle;
+    this.images = this.$store.getters.getImages;
+
     var htmlElement = document.getElementById("canvas-container");
     var drawingContext = htmlElement.getContext("2d");
     this.canvas = drawingContext;
+
+    this.$store.dispatch('setCanvas', this.canvas);
 
     this.drawRectangle();
     this.drawCircle();
