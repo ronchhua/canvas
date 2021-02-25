@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    <RotateButton :rectangle="rectangle" :circle="circle" :images="images" />
     <div class = "item">{{hoverText}}</div>
     <canvas id = "canvas-container" v-on:mousemove="checkMouseHover" width="600" height="600"></canvas>
     <img src="./assets/tiger-Siberian.jpg" id="tigerImage" width="30" height="20" style="display: none;">           <!-- Images need to be rendered before being accessed by canvas-->
@@ -9,9 +10,14 @@
 
 <script>
 
+import RotateButton from './components/RotateButton.vue';
+
 export default {
+
+
   name: 'App',
   components: {
+    RotateButton
   },
 
   data() {
@@ -151,31 +157,12 @@ export default {
         var imageX2 = this.images[i].x + this.images[i].width;
         var imageY2 = this.images[i].y + this.images[i].height;
 
-        console.log(imageX, imageY, imageX2, imageY2);
-
         if(event.offsetX >= imageX && event.offsetX <= imageX2 && event.offsetY >= imageY && event.offsetY <= imageY2) {
           return this.images[i].imageName;
         }
+        
       }
-      
-/*
-      this.images.forEach(image => {
 
-        console.log(image.imageName);
-
-        var imageX = image.x;
-        var imageY = image.y;
-        var imageX2 = image.x + image.width;
-        var imageY2 = image.y + image.height;
-
-        console.log(imageX, imageY, imageX2, imageY2);
-        console.log(event.offsetX, event.offsetY);
-        if(event.offsetX >= imageX && event.offsetX <= imageX2 && event.offsetY >= imageY && event.offsetY <= imageY2) {
-          return image.imageName;
-        }
-
-      });
-*/
       return "Nothing hovered over";
 
     }
