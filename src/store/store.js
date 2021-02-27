@@ -10,37 +10,25 @@ export const store = new Vuex.Store( {
         rotation: 0,
 
         canvas: null,
-
-        rectangle: {    // (50 - 75, 137.5-50) => (-25, 87.5) is the new (x,y) with respect to center (0,0)
+        imageElements: [],
+        rectangle: {  
             x: 50,
             y: 50,
-            coordinates: {
-                topLeft: [50, 50],
-                topRight: [150, 50],
-                bottomLeft: [50, 225],
-                bottomRight: [150, 225],
-            },
-            center: [100, 137.5],
-            prevX: null,
-            prevY: null,
-            cartesianCoords: {
-                topLeft: [50-100, 225-137.5],       // This is basically the bottomLeft - offset.
-                topRight: [150-100, 225-137.5],     // This is bottomRight - offset.
-                bottomLeft: [50-100, 50-137.5],     // This is topLeft - offset.
-                bottomRight: [150-100, 50-137.5],   // This is topRight - offset.
-            },
-            cartesianCenter: [100, -37.5],
-            framesX: [],
-            framesY: [],
+            origX: 50,
+            origY: 50,
+            center: [100, 137.5],   // (x1 + (x2+width)) / 2
+            origWidth: 100,
+            origHeight: 175,
             width: 100,
             height: 175,
+            maintainedCur: [50, 50],
         },
         // do paint and do the rotate there
         circle: {
             x: 450,
             y: 400,
-            prevX: null,
-            prevY: null,
+            origX: 450,
+            origY: 400,
             center: [450, 400],
             radius: 50,
         },
@@ -50,71 +38,175 @@ export const store = new Vuex.Store( {
             imageName: 'Tiger',
             x: 250,
             y: 50,
-            x2: 550,
-            y2: 250,
-            prevX: null,
-            prevY: null,
-            center: [400, 150],
-            width: 300,
+            origX: 250,
+            origY: 50,
+            center: [375, 150],
+            origWidth: 250,
+            origHeight: 200,
+            width: 250,
             height: 200,
+            maintainedCur: [250, 50],
         },
         {
             imageName: 'Hearthstone', 
             x: 50,
             y: 300,
-            x2: 350,
-            y2: 500,
-            prevX: null,
-            prevY: null,
-            center: [200, 400],
-            width: 300,
+            origX: 50,
+            origY: 300,
+            center: [175, 400],
+            origWidth: 250,
+            origHeight: 200,
+            width: 250,
             height: 200,
+            maintainedCur: [50, 300],
         }
         ],
     },
 
     //Create functions that can modify these states 
-    mutations: {    
+    mutations: {  
+
         rotateClockwise (state, degrees) {
             state.rotation += degrees;
         },
+
         updateCoordinates (state) {
 
-            for(var i = 1; i <= state.rotation; i++) {
+            state.rectangle.x = state.rectangle.maintainedCur[0];
+            state.rectangle.y = state.rectangle.maintainedCur[1];
+
+            state.rectangle.x -= state.rectangle.center[0];
+            state.rectangle.y -= state.rectangle.center[1];
+
+            state.images.forEach((image) => {
+
+                image.x = image.maintainedCur[0];
+                image.y = image.maintainedCur[1];
+
+                image.x -= image.center[0];
+                image.y -= image.center[1];
+            });
+
+            var finalCoords = [];
+            var elements = [];
           
-            //for(const coord in state.rectangle.cartesianCoords) {
+            var convertedRadians = 90 * (Math.PI / 180);   // Rotate 359->270
 
 
-                var convertedRadians = (360-i) * (Math.PI / 180);   // Rotate 359->270
-                    //var convertedRadians = (360-state.rotation) * (Math.PI / 180); // 200,75
+            var rotatedX = state.rectangle.x*Math.cos(convertedRadians) - state.rectangle.y*Math.sin(convertedRadians);
+            var rotatedY = state.rectangle.x*Math.sin(convertedRadians) + state.rectangle.y*Math.cos(convertedRadians);
+            
+            var positionedX = rotatedX+state.rectangle.center[0];
+            var positionedY = rotatedY+state.rectangle.center[1];
 
-                    var rotatedX = state.rectangle.cartesianCoords['topLeft'][0]*Math.cos(convertedRadians) - state.rectangle.cartesianCoords['topLeft'][1]*Math.sin(convertedRadians);
-                    var rotatedY = state.rectangle.cartesianCoords['topLeft'][0]*Math.sin(convertedRadians) + state.rectangle.cartesianCoords['topLeft'][1]*Math.cos(convertedRadians);
-                    
-                    var positionedX = rotatedX+state.rectangle.center[0];
-                    var positionedY = rotatedY+state.rectangle.center[1];
+            elements.push(state.rectangle);
+            finalCoords.push([positionedX, positionedY]);
 
-                    //console.log(positionedX, positionedY);
+            state.images.forEach((image) => {
 
-                    
-                    //state.canvas.beginPath();              // Use this to separate shapes
-                    //state.canvas.fillStyle = '#FF00FF';    // Sets the rectangle insides orange
-                    //state.canvas.rect(positionedX, positionedY - (state.rectangle.width), state.rectangle.height, state.rectangle.width);
-                    //state.canvas.fill();
-                    //state.canvas.closePath();
-                    
-                    console.log(positionedX, positionedY - (state.rectangle.width));
-                    state.rectangle.framesX.push(positionedX);
-                    state.rectangle.framesY.push(positionedY - (state.rectangle.width));
+                var convertedRadians = 90 * (Math.PI / 180);   // Rotate 359->270
 
+                var rotatedX = image.x*Math.cos(convertedRadians) - image.y*Math.sin(convertedRadians);
+                var rotatedY = image.x*Math.sin(convertedRadians) + image.y*Math.cos(convertedRadians);
+                
+                var positionedX = rotatedX+image.center[0];
+                var positionedY = rotatedY+image.center[1];
+
+                elements.push(image);
+                finalCoords.push([positionedX, positionedY]);
+            
+            });
+            
+            var holder;
+            var index = 0;
+
+            switch(state.rotation) {
+                case 90:
+                    elements.forEach((element) => {
+                        element.x = finalCoords[index][0] - element.origHeight;
+                        element.y = finalCoords[index][1];
+                        
+                        holder = element.width;
+                        element.width = element.height;
+                        element.height = holder;
+                        index++;
+                    });
+                    break;
+                case 180:
+                    elements.forEach((element) => {
+                        element.x = finalCoords[index][0] - element.origWidth;
+                        element.y = finalCoords[index][1] - element.origHeight;
+
+                        holder = element.width;             // We basically make the width equal back to the width, that was changed in 90 degree rotation.
+                        element.width = element.height;
+                        element.height = holder;
+
+                        index++;
+                    });
+                    break;
+                case 270:
+                    elements.forEach((element) => {
+                        element.x = finalCoords[index][0];
+                        element.y = finalCoords[index][1] - element.origWidth;
+                        
+                        holder = element.width;
+                        element.width = element.height;
+                        element.height = holder;
+                        index++;
+
+                    });
+                    break;
+                case 360:
+                    elements.forEach((element) => {
+                        element.x = finalCoords[index][0];
+                        element.y = finalCoords[index][1];
+
+                        holder = element.width;             // We basically make the width equal back to the width, that was changed in 270 degree rotation.
+                        element.width = element.height;
+                        element.height = holder;
+                        index++;
+
+                    });
+                    break;
             }
 
-            //}
- 
+            index=0;
+            elements.forEach((element) => {
+                element.maintainedCur[0] = finalCoords[index][0];
+                element.maintainedCur[1] = finalCoords[index][1];
+                index++;
+            });
+
+
+            console.log(finalCoords[0][0], finalCoords[0][1]);
+            console.log(state.rectangle.x, state.rectangle.y);
+
+
         },
+
         initCanvas(state, canvas) {
             state.canvas = canvas;
-        }
+        },
+
+        storeImageElements(state, image) {
+            state.imageElements.push(image);
+        },
+
+        clearPositions(state) {
+            for(const point in state.rectangle.cartesianCoords) {
+                    
+                state.rectangle.frames[point].x = [];
+                state.rectangle.frames[point].y = [];
+
+                state.images.forEach((image) => {
+                    image.frames[point].x = [];
+                    image.frames[point].y = [];
+
+                });
+
+            }
+        },
+        
     },
 
     //Calls mutations asynchronously, mutations occur synchronously
@@ -131,6 +223,12 @@ export const store = new Vuex.Store( {
 
         updateElements (context) {
             context.commit('updateCoordinates');
+        },
+        clearFrames (context) {
+            context.commit('clearPositions');
+        },
+        addImageElement(context, image) {
+            context.commit('storeImageElements', image);
         }
     },
 
@@ -151,6 +249,9 @@ export const store = new Vuex.Store( {
         getCanvas (state) {
             return state.canvas;
         },
+        getImageElements (state) {
+            return state.imageElements;
+        }
     }
 
 });

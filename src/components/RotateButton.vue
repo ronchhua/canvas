@@ -20,53 +20,81 @@ export default {
       this.$store.dispatch('rotateAction', 90);
       this.$store.dispatch('updateElements');
       this.animate();
+      this.clearFrames();
     },
     
-    draw(angle) {
-      var canvasInstance = this.$store.getters.getCanvas;
-      canvasInstance.save();
-
-      var rectangle = this.$store.getters.getRectangle;
-
-     // canvasInstance.clearRect(rectangle['x'], rectangle['y'], rectangle['width'], rectangle['height']);
-
-      console.log("coordinates:", rectangle.framesX[angle-1], rectangle.framesY[angle-1]);
-
-      canvasInstance.beginPath();              // Use this to separate shapes
-      canvasInstance.fillStyle = '#FFA5FF';    // Sets the rectangle insides orange
-      canvasInstance.rect(rectangle.framesX[angle-1], rectangle.framesY[angle-1], 20, 20);
-      canvasInstance.fill();
-      canvasInstance.closePath();
-
-      canvasInstance.restore();
+    drawRect(canvasInstance, image, angle) {
 
 
+        // Saves the current state of all the elements in canvas
+        canvasInstance.save();
+  
+        canvasInstance.translate(image.origX + (image.origWidth/2), image.origY + (image.origHeight/2));
 
-/*
-      var rectangle = this.$store.getters.getRectangle;
+        canvasInstance.beginPath();              // Use this to separate shapes
+        canvasInstance.fillStyle = '#FFA500';    // Sets the rectangle insides orange
+        canvasInstance.rotate(angle * (Math.PI / 180));
 
-      canvasInstance.translate(rectangle.center[0], rectangle.center[1]);
-      canvasInstance.rotate(angle - 89.83);
-      canvasInstance.rect(rectangle['x'], rectangle['y'], rectangle['width'], rectangle['height']);
+        canvasInstance.translate(-1*(image.origX+(image.origWidth/2)), -1*(image.origY+(image.origHeight/2)));
+        canvasInstance.clearRect(image['origX']-2, image['origY']-2, image['origWidth']+2, image['origHeight']);
+        canvasInstance.clearRect(image['origX'], image['origY'], image['origWidth']+2, image['origHeight']+2);
+
+        canvasInstance.rect(image['origX'], image['origY'], image['origWidth'], image['origHeight']);
+
+        canvasInstance.fill();
+        canvasInstance.closePath();
+
+        canvasInstance.restore(); //Restores those states.
+    },
+
+    drawImages(canvasInstance, image, angle, imageElement) {
+        // Saves the current state of all the elements in canvas
+        canvasInstance.save();
+
+        canvasInstance.translate(image.origX + (image.origWidth/2), image.origY + (image.origHeight/2));
+
+        canvasInstance.beginPath();              // Use this to separate shapes
+        canvasInstance.rotate(angle * (Math.PI / 180));
+        canvasInstance.translate(-1*(image.origX+(image.origWidth/2)), -1*(image.origY+(image.origHeight/2)));
+
+        canvasInstance.clearRect(image['origX']-3, image['origY']-3, image['origWidth']+2, image['origHeight']+2);
+        canvasInstance.clearRect(image['origX'], image['origY'], image['origWidth']+3, image['origHeight']+3);
+
+        canvasInstance.drawImage(imageElement, image['origX'], image['origY'], image['origWidth'], image['origHeight']);
+
+        canvasInstance.fill();
+        canvasInstance.closePath();
+
+        canvasInstance.restore(); //Restores those states.
       
-      */
-      //console.log(angle);
     },
 
     animate() {
-      var incrementer = 1;
 
-      var timer = d3.timer(() => {
+      var incrementer = this.$store.getters.getRotation-90;
+      var canvasInstance = this.$store.getters.getCanvas;
 
-        this.draw(incrementer);
-        //console.log(incrementer);
-        if(incrementer == 90) {
+      var rectangle = this.$store.getters.getRectangle;
+      var images = this.$store.getters.getImages;
+      var imageElements = this.$store.getters.getImageElements;
+
+      var timer = d3.interval(() => {
+        
+        this.drawRect(canvasInstance, rectangle, incrementer);
+        this.drawImages(canvasInstance, images[0], incrementer, imageElements[0]);
+        this.drawImages(canvasInstance, images[1], incrementer, imageElements[1]);
+
+        if(incrementer == this.$store.getters.getRotation) {
           timer.stop();
         }
         incrementer++;
 
-      });
+      }, 20);
 
+    },
+
+    clearFrames() {
+      //this.$store.dispatch('clearFrames', 90);
     }
 
   },

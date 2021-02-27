@@ -54,13 +54,16 @@ export default {
 
     var tigerImage = document.getElementById("tigerImage");
     tigerImage.addEventListener('load', () => {
-      this.canvas.drawImage(tigerImage, this.images[0].x, this.images[0].y, this.images[0].width, this.images[0].height);
+      this.canvas.drawImage(tigerImage, this.images[0].origX, this.images[0].origY, this.images[0].width, this.images[0].height);
     });
 
     var hearthstoneImage = document.getElementById("hearthstoneImage");
     hearthstoneImage.addEventListener('load', () => {
-      this.canvas.drawImage(hearthstoneImage, this.images[1].x, this.images[1].y, this.images[1].width, this.images[1].height);
+      this.canvas.drawImage(hearthstoneImage, this.images[1].origX, this.images[1].origY, this.images[1].width, this.images[1].height);
     });
+
+    this.$store.dispatch('addImageElement', tigerImage);
+    this.$store.dispatch('addImageElement', hearthstoneImage);
     
     this.canvas.stroke();
 
